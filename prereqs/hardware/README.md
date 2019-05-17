@@ -8,3 +8,9 @@ Setting up for the Hardware Summer Project
     ```bash
         $ sudo zerotier-cli join <network-id>
     ```
+
+    - Get SSH access to the machine. I will send you the username and password.
+    ```bash
+        $ ssh-copy-id <username>@10.147.17.206
+        $ Enter your password
+    ```
