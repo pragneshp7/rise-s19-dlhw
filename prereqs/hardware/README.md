@@ -9,9 +9,14 @@ Setting up for the Hardware Summer Project
         $ sudo zerotier-cli join <network-id>
     ```
 
+    - Add this to your ```etc/hosts``` file
+    ```bash
+        10.147.17.206    rise_pc
+    ```
+
     - Get SSH access to the machine. I will send you the username and password.
     ```bash
-        $ ssh-copy-id <username>@10.147.17.206
+        $ ssh-copy-id <username>@rise_pc
         $ Enter your password
     ```
 
