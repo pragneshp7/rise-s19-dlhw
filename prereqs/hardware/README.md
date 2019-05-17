@@ -14,3 +14,22 @@ Setting up for the Hardware Summer Project
         $ ssh-copy-id <username>@10.147.17.206
         $ Enter your password
     ```
+
+2. Setting up a Bluespec Hello-World
+    - In this step, we will set-up a Hello World in Bluespec to ensure everything is okay
+    
+    - Create a git branch first. Create a copy of the templates folder and rename it to <username> and run make.
+    ```bash
+        $ git checkout -b prereqs/hello-world-<username>
+        $ cp hello-world/template hello-world/<username>
+        $ cd hello-world/<username>
+        $ make
+    ```
+
+    - This should print "Hello World". Edit TestModule.bsv and change the print message and re-run Make.
+
+    - Now commit the changes and push
+    ```bash
+        $ git commit -am "hello-world done"
+        $ git push origin prereqs/hello-world-<username>
+    ```
