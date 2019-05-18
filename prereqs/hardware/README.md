@@ -18,14 +18,22 @@ Setting up for the Hardware Summer Project
     ```bash
         $ ssh-copy-id <username>@rise_pc
         $ Enter your password
+        $ ssh <username>@rise_pc
     ```
 
 2. Setting up a Bluespec Hello-World
     - In this step, we will set-up a Hello World in Bluespec to ensure everything is okay
     
+    - Clone this repo
+    ```bash
+        git clone https://github.com/anmolsahoo25/rise-s19-dlhw
+        cd rise-s19-dlhw
+    ```
+    
     - Create a git branch first. Create a copy of the templates folder and rename it to <username> and run make.
     ```bash
         $ git checkout -b prereqs/hello-world-<username>
+        $ cd prereqs/hardware
         $ cp hello-world/template hello-world/<username>
         $ cd hello-world/<username>
         $ make
