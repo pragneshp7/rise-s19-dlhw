@@ -4,7 +4,7 @@ import FIFO::*;
 module mkTop ();
 
     rule finish_sim;
-        $display("Hello world");
+        $display("Hello world Priyal");
         $finish;
     endrule
 endmodule
