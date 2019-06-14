@@ -56,6 +56,8 @@ interface Ifc_PEFifo;
     method Action tr_weightfifo (Bit#(32) x);
     method Action tr_weigh (Bit#(32) x);
     method Action tr_conv (Bit#(32) x);
+    method Action tr_convout (Bit#(32) x);
+
 
     interface Ifc_PEArray pearray;
 endinterface
@@ -355,6 +357,7 @@ module mkPEFifo (Ifc_PEFifo);
     Reg #(Bit#(32)) inputfifo <- mkReg(0);
     Reg #(Bit#(32)) weightfifo <- mkReg(0);
     Reg #(Bit#(32)) outfifo <- mkReg(0);
+    Reg #(Bit#(32)) conout <- mkReg(0);
     Reg #(Bit#(32)) con <- mkReg(0);
     Reg #(Bit#(32)) weigh <- mkReg(0);
 
@@ -366,20 +369,20 @@ module mkPEFifo (Ifc_PEFifo);
     FIFOF #(Bit#(32)) fifox6 <- mkSizedFIFOF(5);
     FIFOF #(Bit#(32)) fifox7 <- mkSizedFIFOF(5);
  
-    FIFOF #(Bit#(32)) fifoyin1 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoyin2 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoyin3 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoyin4 <- mkSizedFIFOF(5);   
+    FIFOF #(Bit#(32)) fifoyin1 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoyin2 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoyin3 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoyin4 <- mkSizedFIFOF(6);   
 
     FIFOF #(Bit#(32)) fifow1 <- mkSizedFIFOF(4);
     FIFOF #(Bit#(32)) fifow2 <- mkSizedFIFOF(4);
     FIFOF #(Bit#(32)) fifow3 <- mkSizedFIFOF(4);
     FIFOF #(Bit#(32)) fifow4 <- mkSizedFIFOF(4);
     
-    FIFOF #(Bit#(32)) fifoy1 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoy2 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoy3 <- mkSizedFIFOF(5);
-    FIFOF #(Bit#(32)) fifoy4 <- mkSizedFIFOF(5);
+    FIFOF #(Bit#(32)) fifoy1 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoy2 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoy3 <- mkSizedFIFOF(6);
+    FIFOF #(Bit#(32)) fifoy4 <- mkSizedFIFOF(6);
 
     rule rl_xinput1 (con == 1 && weigh == 0);// && fifox1.notEmpty); //conv same as convs in PEArray
         let x = fifox1.first;
@@ -472,19 +475,19 @@ $display("%t rl_yinput1 fired",$time);
  //$display("%t rl_winput4 fired",$time);
     endrule
 
-    rule rl_youtput1 (con == 1 && weigh == 0);// && fifoy1.notFull);
+    rule rl_youtput1 (conout == 1 && weigh == 0);// && fifoy1.notFull);
         fifoy1.enq(pearr.youtput1);
 $display("%t rl_youtput1 fired enq value: %0d",$time, pearr.youtput1);
 
     endrule
-    rule rl_youtput2 (con == 1 && weigh == 0);// && fifoy2.notFull);
+    rule rl_youtput2 (conout == 1 && weigh == 0);// && fifoy2.notFull);
 $display("%t rl_youtput2 fired enq value: %0d",$time, pearr.youtput2);
     fifoy2.enq(pearr.youtput2);
     endrule
-    rule rl_youtput3 (con == 1 && weigh == 0);// && fifoy3.notFull);
+    rule rl_youtput3 (conout == 1 && weigh == 0);// && fifoy3.notFull);
         fifoy3.enq(pearr.youtput3);
     endrule
-    rule rl_youtput4 (con == 1 && weigh == 0);// && fifoy4.notFull);
+    rule rl_youtput4 (conout == 1 && weigh == 0);// && fifoy4.notFull);
         fifoy4.enq(pearr.youtput4);
     endrule
  
@@ -549,21 +552,21 @@ $display("%t yfifoout1 x = %0d",$time,r);
     method ActionValue #(Bit#(32)) yfifoout2 if (outfifo == 1);// && fifoy2.notEmpty);
         let t = fifoy2.first;
         fifoy2.deq;
-        $display("%t yfifoout1 x = %0d",$time,t); 
+        $display("%t yfifoout2 x = %0d",$time,t); 
         return t;
     endmethod
 
     method ActionValue #(Bit#(32)) yfifoout3 if (outfifo == 1);// && fifoy3.notEmpty);
         let u = fifoy3.first;
         fifoy3.deq;
-$display("%t yfifoout1 x = %0d",$time,u); 
+$display("%t yfifoout3 x = %0d",$time,u); 
         return u;
     endmethod
 
     method ActionValue #(Bit#(32)) yfifoout4 if (outfifo == 1);// && fifoy4.notEmpty);
         let o = fifoy4.first;
         fifoy4.deq;
-$display("%t yfifoout1 x = %0d",$time,o); 
+$display("%t yfifoout4 x = %0d",$time,o); 
         return o;
     endmethod
 
@@ -575,6 +578,11 @@ $display("%t yfifoout1 x = %0d",$time,o);
     method Action tr_conv (Bit#(32) x);
         if (x == 1) con <= 1;
         else con <= 0;
+    endmethod
+
+    method Action tr_convout (Bit#(32) x);
+        if (x == 1) conout <= 1;
+        else conout <= 0;
     endmethod
 
     method Action tr_inputfifo (Bit#(32) x);
@@ -644,16 +652,7 @@ module mkTop (Empty);
             $display ("%t Weight transfer ended", $time);
             endaction
 
-            action
-                /* let x = fif.yfifoout1;
-                $display("%t y11 = %0d", $time, x); 
-                let y = fif.yfifoout2;
-                $display("%t y12 = %0d", $time, y);
-                let z = fif.yfifoout3;
-                $display("%t y13 = %0d", $time, z);
-                let a = fif.yfifoout4;
-                $display("%t y14 = %0d", $time, a); */
-
+            action    
                 fif.xfifoin1(1);
                 fif.xfifoin2(1);
                 fif.xfifoin3(1);
@@ -726,8 +725,20 @@ module mkTop (Empty);
                 fif.yfifoin3(0);
                 fif.yfifoin4(0);
                 $display("%t Conv cycle 4",$time);
+                fif.tr_convout(1);
             endaction
             action
+                fif.xfifoin1(6);
+                fif.xfifoin2(6);
+                fif.xfifoin3(6);
+                fif.xfifoin4(6);
+                fif.xfifoin5(6);
+                fif.xfifoin6(6);
+                fif.xfifoin7(6);
+                fif.yfifoin1(0);
+                fif.yfifoin2(0);
+                fif.yfifoin3(0);
+                fif.yfifoin4(0);
                 let x = fif.yfifoout1;
                 $display("%t y11 = %0d", $time, x); 
                 let y = fif.yfifoout2;
@@ -759,7 +770,7 @@ module mkTop (Empty);
                 let a = fif.yfifoout4;
                 $display("%t y14 = %0d", $time, a);
             endaction
-action
+            action
                 let x = fif.yfifoout1;
                 $display("%t y11 = %0d", $time, x); 
                 let y = fif.yfifoout2;
@@ -769,7 +780,7 @@ action
                 let a = fif.yfifoout4;
                 $display("%t y14 = %0d", $time, a);
             endaction
-action
+            action
                 let x = fif.yfifoout1;
                 $display("%t y11 = %0d", $time, x); 
                 let y = fif.yfifoout2;
@@ -779,6 +790,27 @@ action
                 let a = fif.yfifoout4;
                 $display("%t y14 = %0d", $time, a);
             endaction
+            action
+                let x = fif.yfifoout1;
+                $display("%t y11 = %0d", $time, x); 
+                let y = fif.yfifoout2;
+                $display("%t y12 = %0d", $time, y);
+                let z = fif.yfifoout3;
+                $display("%t y13 = %0d", $time, z);
+                let a = fif.yfifoout4;
+                $display("%t y14 = %0d", $time, a);
+            endaction
+            action
+                let x = fif.yfifoout1;
+                $display("%t y11 = %0d", $time, x); 
+                let y = fif.yfifoout2;
+                $display("%t y12 = %0d", $time, y);
+                let z = fif.yfifoout3;
+                $display("%t y13 = %0d", $time, z);
+                let a = fif.yfifoout4;
+                $display("%t y14 = %0d", $time, a);
+            endaction
+
         endseq
     );
     mkAutoFSM(test);
