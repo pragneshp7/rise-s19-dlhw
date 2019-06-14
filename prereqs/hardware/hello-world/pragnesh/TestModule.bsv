@@ -51,14 +51,15 @@ interface Ifc_PEFifo;
     method Action wfifoin3 (Bit#(32) x);
     method Action wfifoin4 (Bit#(32) x);
 
-method Action tr_inputfifo (Bit#(32) x);
-method Action tr_outfifo (Bit#(32) x);
-method Action tr_weightfifo (Bit#(32) x);
-method Action tr_weigh (Bit#(32) x);
-method Action tr_conv (Bit#(32) x);
+    method Action tr_inputfifo (Bit#(32) x);
+    method Action tr_outfifo (Bit#(32) x);
+    method Action tr_weightfifo (Bit#(32) x);
+    method Action tr_weigh (Bit#(32) x);
+    method Action tr_conv (Bit#(32) x);
 
-    
+    interface Ifc_PEArray pearray;
 endinterface
+
 
 interface Ifc_PE;
     method Bit#(32) rightoutput();
@@ -88,7 +89,7 @@ module mkPE (Ifc_PE);
     //weightoutput can only called one clock cycle after weightinp
  
     method Action weightinp (Bit#(32) w);
-$display("%t weightinp: %0d fired",$time,w);
+//$display("%t weightinp: %0d fired",$time,w);
 
         rg_weight <= w;
     endmethod
@@ -136,6 +137,7 @@ module mkPEArray (Ifc_PEArray);
     rule rl_xconnect2 (weighttrans == 0 && conv == 1);
                let x = array[1][0].rightoutput;
                array[0][1].leftinput(x);
+$display("%t xcon2 x:%0d array[0][1]: %0d",$time,x, array[0][1].rightoutput);
     endrule
 
     rule rl_xconnect3 (weighttrans == 0 && conv == 1);
@@ -143,6 +145,8 @@ module mkPEArray (Ifc_PEArray);
                array[1][1].leftinput(x);
                let y = array[1][1].rightoutput;
                array[0][2].leftinput(y);
+$display("%t xcon3 x:%0d array[1][1]: %0d",$time,x, array[1][1].rightoutput);
+$display("%t xcon3 y:%0d array[0][2]: %0d",$time,y, array[0][2].rightoutput);
     endrule
 
     rule rl_xconnect4 (weighttrans == 0 && conv == 1);
@@ -182,16 +186,22 @@ module mkPEArray (Ifc_PEArray);
     endrule
 
     rule rl_wconnect1 (weighttrans == 1 && conv == 0);
-       $display("%t rl_wconnec1 fired",$time);
+      // $display("%t rl_wconnec1 fired",$time);
  let x = array[0][0].weightoutput;
                 array[1][0].weightinp(x);
-$display("%t x:%0d array[1][0]: %0d",$time,x, array[1][0].weightoutput);
+$display("%t wcon x:%0d array[1][0]: %0d",$time,x, array[1][0].weightoutput);
 
         let y = array[1][0].weightoutput;
                 array[2][0].weightinp(y);
-        let z = array[2][0].weightoutput;
+$display("%t wcon y:%0d array[2][0]: %0d",$time,y, array[2][0].weightoutput);
+
+
+                let z = array[2][0].weightoutput;
                 array[3][0].weightinp(z); 
-    endrule
+$display("%t wcon z:%0d array[3][0]: %0d",$time,z, array[3][0].weightoutput);
+
+
+            endrule
 
     rule rl_wconnect2 (weighttrans == 1 && conv == 0);
         let x = array[0][1].weightoutput;
@@ -224,7 +234,10 @@ $display("%t x:%0d array[1][0]: %0d",$time,x, array[1][0].weightoutput);
         let y = array[0][1].downoutput;
                 array[0][2].upinput(y);
         let z = array[0][2].downoutput;
-                array[0][3].upinput(z); 
+                array[0][3].upinput(z);
+$display("%t ycon1 x:%0d array[0][1]: %0d",$time,x, array[0][1].downoutput);
+$display("%t ycon1 y:%0d array[0][2]: %0d",$time,y, array[0][2].downoutput); 
+$display("%t ycon1 z:%0d array[0][3]: %0d",$time,z, array[0][3].downoutput); 
     endrule
 
     rule rl_yconnect2 (weighttrans == 0 && conv == 1);
@@ -234,6 +247,9 @@ $display("%t x:%0d array[1][0]: %0d",$time,x, array[1][0].weightoutput);
                 array[1][2].upinput(y);
         let z = array[1][2].downoutput;
                 array[1][3].upinput(z); 
+$display("%t ycon2 x:%0d array[1][1]: %0d",$time,x, array[1][1].downoutput);
+$display("%t ycon2 y:%0d array[1][2]: %0d",$time,y, array[1][2].downoutput); 
+$display("%t ycon2 z:%0d array[1][3]: %0d",$time,z, array[1][3].downoutput); 
     endrule
 
     rule rl_yconnect3 (weighttrans == 0 && conv == 1);
@@ -264,66 +280,66 @@ $display("%t x:%0d array[1][0]: %0d",$time,x, array[1][0].weightoutput);
         else conv <= 0;
     endmethod 
 
-    method Action xinput1 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput1 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[0][0].leftinput(x);
     endmethod
-    method Action xinput2 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput2 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[1][0].leftinput(x);
     endmethod
-    method Action xinput3 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput3 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[2][0].leftinput(x);
     endmethod
-    method Action xinput4 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput4 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[3][0].leftinput(x);
     endmethod
-    method Action xinput5 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput5 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         delay[0] <= x;
     endmethod
-    method Action xinput6 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput6 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         delay[1] <= x;
     endmethod
-    method Action xinput7 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action xinput7 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         delay[3] <= x;
     endmethod
-    method Action yinput1 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action yinput1 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[0][0].upinput(x);
     endmethod
-    method Action yinput2 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action yinput2 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[1][0].upinput(x);
     endmethod
-    method Action yinput3 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action yinput3 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[2][0].upinput(x);
     endmethod
-    method Action yinput4 (Bit#(32) x); //if (weighttrans == 0 && conv == 1);
+    method Action yinput4 (Bit#(32) x) if (weighttrans == 0 && conv == 1);
         array[3][0].upinput(x);
     endmethod
 
-    method Bit#(32) youtput1 ();//if (weighttrans == 0 && conv == 1);
+    method Bit#(32) youtput1 if (weighttrans == 0 && conv == 1);
         let x = array[0][3].downoutput;
         return x;
     endmethod
-    method Bit#(32) youtput2 ();//if (weighttrans == 0 && conv == 1);
+    method Bit#(32) youtput2 if (weighttrans == 0 && conv == 1);
         let x = array[1][3].downoutput;
         return x;
     endmethod
-    method Bit#(32) youtput3 (); //if (weighttrans == 0 && conv == 1);
+    method Bit#(32) youtput3 if (weighttrans == 0 && conv == 1);
         let x = array[2][3].downoutput;
         return x;
     endmethod
-    method Bit#(32) youtput4 ();//if (weighttrans == 0 && conv == 1);
+    method Bit#(32) youtput4 if (weighttrans == 0 && conv == 1);
         let x = array[3][3].downoutput;
         return x;
     endmethod
-    method Action winput1 (Bit#(32) x) ;//if (weighttrans == 1 && conv == 0);
+    method Action winput1 (Bit#(32) x) if (weighttrans == 1 && conv == 0);
         array[0][0].weightinp(x);
     endmethod
-    method Action winput2 (Bit#(32) x);// if (weighttrans == 1 && conv == 0);
+    method Action winput2 (Bit#(32) x) if (weighttrans == 1 && conv == 0);
         array[0][1].weightinp(x);
     endmethod
-    method Action winput3 (Bit#(32) x) ;//if (weighttrans == 1 && conv == 0);
+    method Action winput3 (Bit#(32) x) if (weighttrans == 1 && conv == 0);
         array[0][2].weightinp(x);
     endmethod
-    method Action winput4 (Bit#(32) x);// if (weighttrans == 1 && conv == 0);
+    method Action winput4 (Bit#(32) x) if (weighttrans == 1 && conv == 0);
         array[0][3].weightinp(x);
     endmethod
 
@@ -334,6 +350,7 @@ import FIFOF ::*;
 module mkPEFifo (Ifc_PEFifo);
 
     Ifc_PEArray pearr <- mkPEArray;
+   
 
     Reg #(Bit#(32)) inputfifo <- mkReg(0);
     Reg #(Bit#(32)) weightfifo <- mkReg(0);
@@ -373,38 +390,38 @@ module mkPEFifo (Ifc_PEFifo);
     rule rl_xinput2 (con == 1 && weigh == 0);// && fifox2.notEmpty); 
         let x = fifox2.first;
         pearr.xinput2(x);
-         $display("%t rl_xinput1 fired",$time);
+       //  $display("%t rl_xinput1 fired",$time);
         fifox2.deq;
     endrule
     rule rl_xinput3 (con == 1 && weigh == 0);// && fifox3.notEmpty); 
         let x = fifox3.first;
         pearr.xinput3(x);
         fifox3.deq;
- $display("%t rl_xinput1 fired",$time);
+// $display("%t rl_xinput1 fired",$time);
     endrule
     rule rl_xinput4 (con == 1 && weigh == 0);// && fifox4.notEmpty); 
         let x = fifox4.first;
         pearr.xinput4(x);
         fifox4.deq;
- $display("%t rl_xinput1 fired",$time);
+ //$display("%t rl_xinput1 fired",$time);
     endrule
     rule rl_xinput5 (con == 1 && weigh == 0);// && fifox5.notEmpty); 
         let x = fifox5.first;
         pearr.xinput5(x);
         fifox5.deq;
- $display("%t rl_xinput1 fired",$time);
+// $display("%t rl_xinput1 fired",$time);
     endrule
     rule rl_xinput6 (con == 1 && weigh == 0);// && fifox6.notEmpty); 
         let x = fifox6.first;
         pearr.xinput6(x);
         fifox6.deq;
- $display("%t rl_xinput1 fired",$time);
+// $display("%t rl_xinput1 fired",$time);
     endrule
     rule rl_xinput7 (con == 1 && weigh == 0);// && fifox7.notEmpty); 
         let x = fifox7.first;
         pearr.xinput7(x);
         fifox7.deq;
-         $display("%t rl_xinput1 fired",$time);
+  //       $display("%t rl_xinput1 fired",$time);
     endrule
     
     rule rl_yinput1 (con == 1 && weigh == 0 );//&& fifoyin1.notEmpty); //conv same as convs in PEArray
@@ -440,19 +457,19 @@ $display("%t rl_yinput1 fired",$time);
         let m = fifow2.first;
         pearr.winput2(m);
         fifow2.deq;
- $display("%t rl_winput2 fired",$time);
+// $display("%t rl_winput2 fired",$time);
     endrule
     rule rl_winput3 (weigh == 1 && con == 0);// && fifow3.notEmpty);
         let k = fifow3.first;
         pearr.winput3(k);
         fifow3.deq; 
-         $display("%t rl_winput3 fired",$time);
+  //       $display("%t rl_winput3 fired",$time);
     endrule
     rule rl_winput4 (weigh == 1 && con == 0);// && fifow4.notEmpty);
         let l = fifow4.first;
         pearr.winput4(l);
         fifow4.deq;
- $display("%t rl_winput4 fired",$time);
+ //$display("%t rl_winput4 fired",$time);
     endrule
 
     rule rl_youtput1 (con == 1 && weigh == 0);// && fifoy1.notFull);
@@ -461,7 +478,8 @@ $display("%t rl_youtput1 fired enq value: %0d",$time, pearr.youtput1);
 
     endrule
     rule rl_youtput2 (con == 1 && weigh == 0);// && fifoy2.notFull);
-        fifoy2.enq(pearr.youtput2);
+$display("%t rl_youtput1 fired enq value: %0d",$time, pearr.youtput2);
+    fifoy2.enq(pearr.youtput2);
     endrule
     rule rl_youtput3 (con == 1 && weigh == 0);// && fifoy3.notFull);
         fifoy3.enq(pearr.youtput3);
@@ -499,8 +517,6 @@ $display("%t xfifoin1 fired",$time);
     endmethod
     method Action wfifoin2 (Bit#(32) x) if (weightfifo == 1);// && fifow2.notFull);
         fifow2.enq(x);
-$display("%t wfifoin2 fired",$time);
-
     endmethod
     method Action wfifoin3 (Bit#(32) x) if (weightfifo == 1);// && fifow3.notFull);
         fifow3.enq(x);
@@ -523,27 +539,32 @@ $display("%t wfifoin2 fired",$time);
     endmethod
  
     method ActionValue #(Bit#(32)) yfifoout1 if (outfifo == 1);// && fifoy1.notEmpty);
-        let x = fifoy1.first;
+        let r = fifoy1.first;
         fifoy1.deq;
-        return x;
+$display("%t yfifoout1 x = %0d",$time,r); 
+        return r;
+
     endmethod
 
     method ActionValue #(Bit#(32)) yfifoout2 if (outfifo == 1);// && fifoy2.notEmpty);
-        let x = fifoy2.first;
+        let t = fifoy2.first;
         fifoy2.deq;
-        return x;
+        $display("%t yfifoout1 x = %0d",$time,t); 
+        return t;
     endmethod
 
     method ActionValue #(Bit#(32)) yfifoout3 if (outfifo == 1);// && fifoy3.notEmpty);
-        let x = fifoy3.first;
+        let u = fifoy3.first;
         fifoy3.deq;
-        return x;
+$display("%t yfifoout1 x = %0d",$time,u); 
+        return u;
     endmethod
 
     method ActionValue #(Bit#(32)) yfifoout4 if (outfifo == 1);// && fifoy4.notEmpty);
-        let x = fifoy4.first;
+        let o = fifoy4.first;
         fifoy4.deq;
-        return x;
+$display("%t yfifoout1 x = %0d",$time,o); 
+        return o;
     endmethod
 
     method Action tr_weigh (Bit#(32) x);
@@ -570,13 +591,12 @@ $display("%t wfifoin2 fired",$time);
         if (x == 1) weightfifo <= 1;
         else weightfifo <= 0;
     endmethod
-
+    interface pearray = pearr;
 endmodule
 
 (* synthesize *)
 module mkTop (Empty); 
 
-    Ifc_PEArray arr <- mkPEArray;
     Ifc_PEFifo fif <- mkPEFifo;
     Stmt test=
     (seq
@@ -585,7 +605,7 @@ module mkTop (Empty);
             endaction
 
             action
-                arr.weighttran(1);
+                fif.pearray.weighttran(1);
                 fif.tr_weightfifo(1);
                 fif.tr_weigh(1);
                 $display("%t Weight Transfer to Fifo", $time);
@@ -610,10 +630,12 @@ module mkTop (Empty);
             action
                 $display ("%t Weight transfer 3", $time);
             endaction
-
+	    action
+                $display ("%t Weight transfer 4", $time);
+            endaction
             action
-                arr.weighttran(0);
-                arr.convs(1);
+                fif.pearray.weighttran(0);
+                fif.pearray.convs(1);
                 fif.tr_weightfifo(0);
                 fif.tr_weigh(0);
                 fif.tr_inputfifo(1);
@@ -623,14 +645,14 @@ module mkTop (Empty);
             endaction
 
             action
-                 let x = fif.yfifoout1;
+                /* let x = fif.yfifoout1;
                 $display("%t y11 = %0d", $time, x); 
                 let y = fif.yfifoout2;
                 $display("%t y12 = %0d", $time, y);
                 let z = fif.yfifoout3;
                 $display("%t y13 = %0d", $time, z);
                 let a = fif.yfifoout4;
-                $display("%t y14 = %0d", $time, a); 
+                $display("%t y14 = %0d", $time, a); */
 
                 fif.xfifoin1(1);
                 fif.xfifoin2(1);
@@ -728,6 +750,26 @@ module mkTop (Empty);
             endaction
 
             action
+                let x = fif.yfifoout1;
+                $display("%t y11 = %0d", $time, x); 
+                let y = fif.yfifoout2;
+                $display("%t y12 = %0d", $time, y);
+                let z = fif.yfifoout3;
+                $display("%t y13 = %0d", $time, z);
+                let a = fif.yfifoout4;
+                $display("%t y14 = %0d", $time, a);
+            endaction
+action
+                let x = fif.yfifoout1;
+                $display("%t y11 = %0d", $time, x); 
+                let y = fif.yfifoout2;
+                $display("%t y12 = %0d", $time, y);
+                let z = fif.yfifoout3;
+                $display("%t y13 = %0d", $time, z);
+                let a = fif.yfifoout4;
+                $display("%t y14 = %0d", $time, a);
+            endaction
+action
                 let x = fif.yfifoout1;
                 $display("%t y11 = %0d", $time, x); 
                 let y = fif.yfifoout2;
