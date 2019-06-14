@@ -478,7 +478,7 @@ $display("%t rl_youtput1 fired enq value: %0d",$time, pearr.youtput1);
 
     endrule
     rule rl_youtput2 (con == 1 && weigh == 0);// && fifoy2.notFull);
-$display("%t rl_youtput1 fired enq value: %0d",$time, pearr.youtput2);
+$display("%t rl_youtput2 fired enq value: %0d",$time, pearr.youtput2);
     fifoy2.enq(pearr.youtput2);
     endrule
     rule rl_youtput3 (con == 1 && weigh == 0);// && fifoy3.notFull);
