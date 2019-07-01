@@ -1,0 +1,8 @@
+bsc -verilog TestModule.bsv
+Error: "TestModule.bsv", line 125, column 8: (G0032)
+  A cycle was detected in the design prior to scheduling. It is likely that an
+  action in this module uses circular logic. The cycle is through the
+  following:
+    [Argument 1 of method `wset' of submodule `c_wr_pout',
+     Return value of method `wget' of submodule `c_wr_pout']
+make: *** [Makefile:3: all] Error 1
