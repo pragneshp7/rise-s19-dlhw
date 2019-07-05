@@ -394,18 +394,22 @@ module mkPEFifo (Ifc_PEFifo);
 
     rule rl_counter (con == 1 && weigh == 0);
         counter <= counter + 1;
+        $display("%t rl_counter fired %0d", $time,counter);
     endrule
-    rule rl_counter2 (conout == 1);
+    rule rl_counter2 (conout == 1 && counter2 < 13);
+        $display("%t rl_counter2 fired %0d", $time, counter2);
         counter2 <= counter2 +1;
     endrule
    
     rule rl_conout_start (counter == 3);
         conout <= 1;
+        $display("%t rl_conout_start fired", $time);
     endrule
     rule rl_conout_end (counter2==13);
             conout <= 0;
             counter <= 0;
             counter2 <= 0;
+        $display("%t rl_conout fired", $time);
     endrule
 
     rule rl_xinput1 (con == 1 && weigh == 0);// && fifox1.notEmpty); //conv same as convs in PEArray
