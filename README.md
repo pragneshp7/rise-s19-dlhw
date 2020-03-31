@@ -1,9 +1,8 @@
 Hardware for Deep Learning - Summer 2019 Internship
 ===================================================
 
-Getting Started for Hardware
+Getting Started for with the Accelerator
 ----------------------------
 
-1. Go into the ```prereqs/hardware``` folder and finish the hello-world exercise
-2. The final accelerator BSV code is in the ```prereqs/hello-world-pragnesh``` branch
+Go through the Accelerating_convolutions_using_1_directional_dataflow_accelerator.pdf for more details about the architecture. The paper was accepted to be presented at the IEEE HiPC Student Research Symposium'19.
 
