@@ -1,0 +1,8 @@
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    printf("Hello World\n");
+int *base = 0x12300;
+*base = 0x30;
+int x = *base;
+}
