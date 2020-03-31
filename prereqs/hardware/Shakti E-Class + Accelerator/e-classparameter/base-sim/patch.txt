@@ -1,0 +1,96 @@
+diff --git a/base-sim/Makefile b/base-sim/Makefile
+index 1a16379..64b9b5c 100755
+--- a/base-sim/Makefile
++++ b/base-sim/Makefile
+@@ -123,7 +123,7 @@ CORE:=../src/core/
+ M_EXT:=../src/core/m_ext/
+ FABRIC:=./fabrics/axi4:./fabrics/axi4lite
+ CACHES:=./caches_mmu/src/
+-PERIPHERALS:=./devices/bootrom:./devices/pwm:./devices/uart:./devices/clint:./devices/bram:./devices/riscvDebug013:./devices/jtagdtm/:./devices/err_slave/
++PERIPHERALS:=./devices/bootrom:./devices/pwm:./devices/uart:./devices/clint:./devices/bram:./devices/riscvDebug013:./devices/jtagdtm/:./devices/err_slave/:./devices/dummy_slave
+ COMMON_BSV:=./common_bsv/
+ COMMON_VERILOG:=./common_verilog/
+ BSVINCDIR:=.:%/Prelude:%/Libraries:%/Libraries/BlueNoC:$(CORE):$(M_EXT):$(FABRIC):$(PERIPHERALS):$(COMMON_BSV):$(COMMON_VERILOG)
+diff --git a/base-sim/Soc.bsv b/base-sim/Soc.bsv
+index 60075d3..5499a4b 100644
+--- a/base-sim/Soc.bsv
++++ b/base-sim/Soc.bsv
+@@ -49,6 +49,7 @@ package Soc;
+   import clint::*;
+   import sign_dump::*;
+   import err_slave::*;
++  import dummy_slave::*;
+ 
+   // package imports
+   import Connectable:: *;
+@@ -84,6 +85,8 @@ package Soc;
+       else if(addr>= `DebugBase && addr<= `DebugEnd)
+         slave_num = `Debug_slave_num;
+     `endif
++      else if(addr == `DummyBase)
++        slave_num = `Dummy_slave_num;
+       else
+         slave_num = `Err_slave_num;
+         
+@@ -153,6 +156,7 @@ package Soc;
+     Ifc_uart_axi4#(`paddr,XLEN,0, 16) uart <- mkuart_axi4(curr_clk,curr_reset, 5);
+     Ifc_clint_axi4#(`paddr, XLEN, 0, 1, 16) clint <- mkclint_axi4();
+     Ifc_err_slave_axi4#(`paddr,XLEN,0) err_slave <- mkerr_slave_axi4;
++    Ifc_dummy_slave#(`paddr, XLEN,0) dummy <- mk_dummy_slave;
+ 
+ `elsif CORE_AXI4Lite
+ 
+@@ -240,6 +244,7 @@ package Soc;
+     mkConnection (fabric.v_to_slaves [`Clint_slave_num ],clint.slave);
+     mkConnection (fabric.v_to_slaves [`Sign_slave_num ] , signature.slave);
+     mkConnection (fabric.v_to_slaves [`Err_slave_num ] , err_slave.slave);
++    mkConnection (fabric.v_to_slaves [`Dummy_slave_num], dummy.axi_side);
+   `ifdef debug
+     mkConnection (fabric.v_to_slaves [`Debug_slave_num ] , debug_memory.slave);
+   `endif
+diff --git a/base-sim/Soc.defines b/base-sim/Soc.defines
+index 9110670..f3d6fa6 100644
+--- a/base-sim/Soc.defines
++++ b/base-sim/Soc.defines
+@@ -1,7 +1,7 @@
+ `ifdef debug
+-  `define Num_Slaves 7
++  `define Num_Slaves 8
+ `else
+-  `define Num_Slaves 6
++  `define Num_Slaves 7
+ `endif
+   `define Memory_slave_num 0
+   `define BootRom_slave_num 1
+@@ -13,6 +13,7 @@
+   `define Err_slave_num 6
+ `else
+   `define Err_slave_num 5
++  `define Dummy_slave_num 6
+ `endif
+ // master numbers on fabric
+ // slave numbers of fabric
+@@ -32,4 +33,4 @@
+   `define DebugBase   'h0000_0000
+   `define DebugEnd    'h0000_000F
+ `endif
+-
++`define DummyBase   'h0001_2000
+diff --git a/base-sim/soc_config.inc b/base-sim/soc_config.inc
+index 36deb0e..5701988 100644
+--- a/base-sim/soc_config.inc
++++ b/base-sim/soc_config.inc
+@@ -1,10 +1,10 @@
+-ISA=RV64IMAC
++ISA=RV64IMAFDC
+ MUL=fpga
+ SYNTH=SIM
+-VERBOSITY=0
++VERBOSITY=1
+ USERTRAPS=enable
+ USER=enable
+-COREFABRIC=AXI4Lite
++COREFABRIC=AXI4
+ MULSTAGES=8
+ DIVSTAGES=64
+ FPGA=xc7a100tcsg324-1
